@@ -1,68 +1,116 @@
 # cloud-music-vue
 
-This template should help get you started developing with Vue 3 in Vite.
-
-## Recommended IDE Setup
-
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
+## Add husky & commitlint configuration
 
 ```sh
+# Install Husky v6
+npm install husky --save-dev
+# or
+yarn add husky --dev
+
+# Activate hooks
+npx husky install
+# or
+yarn husky install
+
+# Install commitlint cli and conventional config
+npm install --save-dev @commitlint/{config-conventional,cli}
+# For Windows:
+npm install --save-dev @commitlint/config-conventional @commitlint/cli
+
+# Add hook
+npm pkg set scripts.prepare="husky install"
+npm run prepare
+npx husky add .husky/pre-commit 'npm run lint & npm run lint:css'
+npx husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'
+
+# Configure commitlint to use conventional config
+echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.cjs
+
+## Add conventional-changelog configuration
+
+```sh
+npm install conventional-changelog-cli commitizen cz-conventional-changelog standard-version --save-dev
+
+# or add commitizen to global
+npm install commitizen -g
+
+# Config commitizen
+commitizen init cz-conventional-changelog --save-dev --save-exact
+
+# or add .czrc file to root directory
+echo "{ \"path\": \"cz-conventional-changelog\" }" > .czrc
+
+git add .
+git cz
+```
+
+## Add eslint & prettier configuration
+
+```sh
+npm install @typescript-eslint/eslint-plugin @typescript-eslint/parser vue-eslint-parser eslint eslint-config-prettier eslint-plugin-prettier prettier --save-dev
+
+npm pkg set scripts.lint="eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --no-fix --ignore-path .eslintignore"
+```
+
+## Add stylelint configuration
+
+```sh
+npm install sass stylelint postcss-html postcss-scss stylelint-config-recommended-vue stylelint-config-standard stylelint-config-standard-scss stylelint-scss --save-dev
+
+npm pkg set scripts.lint:css="stylelint \"src/**/*.{scss,css,sass}\" --no-fix"
+```
+
+## Add vscode settings in .vscode/settings.json
+
+```json
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.fixAll.stylelint": true,
+    "source.sortImports": true
+  },
+  "eslint.format.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "vue",
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "eslint.alwaysShowStatus": true,
+  "stylelint.validate": [
+    "css",
+    "less",
+    "postcss",
+    "scss",
+    "vue",
+    "sass",
+  ]
+}
+```
+
+## Add NeteaseCloudMusicApi project as submodule
+
+```sh
+git submodule add git@github.com:Binaryify/NeteaseCloudMusicApi.git
+
+cd NeteaseCloudMusicApi
+
+git checkout 98bb292
+
 npm install
+
+cd ..
+
+npm pkg set scripts.start:server="cd NeteaseCloudMusicApi && cross-env port=3000 node app.js"
+npm pkg set scripts.start:react="vite"
+npm pkg set scripts.start="concurrently \"npm run start:server\" \"npm run start:react\""
 ```
 
-### Compile and Hot-Reload for Development
+## Run project
 
 ```sh
-npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run test:e2e:dev
-```
-
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
+npm start
 ```

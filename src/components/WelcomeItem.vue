@@ -57,7 +57,7 @@ h3 {
     height: 50px;
   }
 
-  .item:before {
+  .item::before {
     content: ' ';
     border-left: 1px solid var(--color-border);
     position: absolute;
@@ -66,7 +66,7 @@ h3 {
     height: calc(50% - 25px);
   }
 
-  .item:after {
+  .item::after {
     content: ' ';
     border-left: 1px solid var(--color-border);
     position: absolute;
@@ -75,11 +75,11 @@ h3 {
     height: calc(50% - 25px);
   }
 
-  .item:first-of-type:before {
+  .item:first-of-type::before {
     display: none;
   }
 
-  .item:last-of-type:after {
+  .item:last-of-type::after {
     display: none;
   }
 }
