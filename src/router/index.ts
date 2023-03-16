@@ -1,5 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+
+const Recommend = import('@/components/Recommend/index.vue')
+const Album = import('@/components/Album/index.vue')
+const Rank = import('@/components/Rank/index.vue')
+const Singers = import('@/components/Singers/index.vue')
+const Singer = import('@/components/Singer/index.vue')
+const Search = import('@/components/Search/index.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,17 +13,41 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      redirect: '/recommend',
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    }
-  ]
+      path: '/recommend',
+      component: Recommend,
+      children: [
+        {
+          path: ':id',
+          component: Album,
+        },
+      ],
+    },
+    {
+      path: '/singers',
+      component: Singers,
+      children: [
+        {
+          path: ':id',
+          component: Singer,
+        },
+      ],
+    },
+    {
+      path: '/rank',
+      component: Rank,
+    },
+    {
+      path: 'album/:id',
+      component: Album,
+    },
+    {
+      path: '/search',
+      component: Search,
+    },
+  ],
 })
 
 export default router
