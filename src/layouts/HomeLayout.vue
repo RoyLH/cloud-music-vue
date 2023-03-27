@@ -1,8 +1,5 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRouter } from 'vue-router'
-defineProps<{
-  msg: string
-}>()
 const router = useRouter()
 const tip = () => alert('用户中心正在开发中，敬请期待:)')
 </script>

@@ -51,6 +51,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 0,
     '@typescript-eslint/no-non-null-assertion': 0,
     '@typescript-eslint/no-var-requires': 0,
+    '@typescript-eslint/no-empty-function': 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'vue/multi-word-component-names': 0,
   },
