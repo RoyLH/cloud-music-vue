@@ -22,5 +22,6 @@ module.exports = {
     'selector-class-pattern': null,
     'selector-id-pattern': null,
     'selector-not-notation': null,
+    'comment-empty-line-before': null,
   },
 }

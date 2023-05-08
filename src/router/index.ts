@@ -43,6 +43,12 @@ const router = createRouter({
         {
           path: '/rank',
           component: Rank,
+          children: [
+            {
+              path: ':id',
+              component: Album,
+            },
+          ],
         },
         {
           path: '/album/:id',
