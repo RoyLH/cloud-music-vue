@@ -1,6 +1,5 @@
 import { getBannerRequest, getRecommendListRequest } from '@/api/request'
 import { defineStore } from 'pinia'
-// import { computed, reactive, ref } from 'vue'
 
 interface State {
   bannerList: any[]
@@ -26,27 +25,23 @@ export const useRecommendStore = defineStore('recommend', {
       this.enterLoading = payload
     },
     async getBannerList() {
-      getBannerRequest()
-        .then((res: any) => {
-          const { banners } = res
+      try {
+        const { banners }: any = await getBannerRequest()
 
-          this.changeBannerList(banners)
-        })
-        .catch(() => {
-          console.log('轮播图数据传输错误')
-        })
+        this.changeBannerList(banners)
+      } catch (error) {
+        console.log('轮播图数据传输错误')
+      }
     },
     async getRecommendList() {
-      getRecommendListRequest()
-        .then((res: any) => {
-          const { result } = res
+      try {
+        const { result }: any = await getRecommendListRequest()
 
-          this.changeRecommendList(result)
-          this.changeEnterLoading(false)
-        })
-        .catch(() => {
-          console.log('推荐歌单数据传输错误')
-        })
+        this.changeRecommendList(result)
+        this.changeEnterLoading(false)
+      } catch (error) {
+        console.log('推荐歌单数据传输错误')
+      }
     },
   },
 })

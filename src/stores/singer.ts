@@ -1,12 +1,39 @@
-import { ref, computed } from 'vue'
+import { getSingerInfoRequest } from '@/api/request'
 import { defineStore } from 'pinia'
 
-export const useSingerStore = defineStore('singer', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
+interface State {
+  artist: any
+  songsOfArtist: any[]
+  loading: boolean
+}
 
-  return { count, doubleCount, increment }
+export const useSingerStore = defineStore('singer', {
+  state: (): State => ({
+    artist: {},
+    songsOfArtist: [],
+    loading: true,
+  }),
+  getters: {},
+  actions: {
+    changeArtist(payload: any) {
+      this.artist = payload
+    },
+    changeSongs(payload: any) {
+      this.songsOfArtist = payload
+    },
+    changeEnterLoading(payload: any) {
+      this.loading = payload
+    },
+    async getSingerInfo(id: string) {
+      try {
+        const { artist, hotSongs }: any = await getSingerInfoRequest(id)
+
+        this.changeArtist(artist)
+        this.changeSongs(hotSongs)
+        this.changeEnterLoading(false)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+  },
 })

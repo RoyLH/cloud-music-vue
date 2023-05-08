@@ -1,12 +1,67 @@
-import { ref, computed } from 'vue'
+import {
+  getHotKeyWordsRequest,
+  getResultSongsListRequest,
+  getSuggestRequest,
+} from '@/api/request'
 import { defineStore } from 'pinia'
 
-export const useSearchStore = defineStore('search', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
+interface State {
+  hotList: any[]
+  suggest: any[]
+  songsList: any[]
+  enterLoading: boolean
+}
 
-  return { count, doubleCount, increment }
+export const useSearchStore = defineStore('search', {
+  state: (): State => ({
+    hotList: [],
+    suggest: [],
+    songsList: [],
+    enterLoading: false,
+  }),
+  getters: {},
+  actions: {
+    changeHotKeyWords(payload: any) {
+      this.hotList = payload
+    },
+    changeSuggest(payload: any) {
+      this.suggest = payload
+    },
+    changeResultSongs(payload: any) {
+      this.songsList = payload
+    },
+    changeEnterLoading(payload: any) {
+      this.enterLoading = payload
+    },
+    async getHotKeyWords() {
+      try {
+        const {
+          result: { hots },
+        }: any = await getHotKeyWordsRequest()
+
+        this.changeHotKeyWords(hots)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+    async getSuggest(query: string) {
+      try {
+        const [
+          { result: suggest = [] },
+          {
+            result: { songs = [] },
+          },
+        ]: any = await Promise.all([
+          getSuggestRequest(query),
+          getResultSongsListRequest(query),
+        ])
+
+        this.changeSuggest(suggest)
+        this.changeResultSongs(songs)
+        this.changeEnterLoading(false)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+  },
 })

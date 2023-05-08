@@ -1,12 +1,33 @@
-import { ref, computed } from 'vue'
+import { getRankListRequest } from '@/api/request'
 import { defineStore } from 'pinia'
 
-export const useRankStore = defineStore('rank', () => {
-  const count = ref(0)
-  const doubleCount = computed(() => count.value * 2)
-  function increment() {
-    count.value++
-  }
+interface State {
+  rankList: any[]
+  loading: boolean
+}
 
-  return { count, doubleCount, increment }
+export const useRankStore = defineStore('rank', {
+  state: (): State => ({
+    rankList: [],
+    loading: true,
+  }),
+  getters: {},
+  actions: {
+    changeRankList(payload: any) {
+      this.rankList = payload
+    },
+    changeLoading(payload: any) {
+      this.loading = payload
+    },
+    async getRankList() {
+      try {
+        const { list }: any = await getRankListRequest()
+
+        this.changeRankList(list)
+        this.changeLoading(false)
+      } catch (error) {
+        console.log(error)
+      }
+    },
+  },
 })
