@@ -1,37 +1,38 @@
 <script setup lang="ts">
 import BScroll from 'better-scroll'
-import { debounce } from '../../api/utils'
-import Loading2 from '../loading-v2/index.vue'
-import Loading from '../loading/index.vue'
+import { debounce } from '@/api/utils'
+import Loading2 from '@/baseUI/loading-v2/index.vue'
+import Loading from '@/baseUI/loading/index.vue'
 import {
   ref,
-  reactive,
+  toRefs,
   defineProps,
   withDefaults,
   onMounted,
   defineEmits,
+  defineExpose,
 } from 'vue'
 
 const props = withDefaults(
   defineProps<{
-    direction: string
-    refresh: boolean
-    // onScroll: () => void
-    click: boolean
-    pullUp: () => void
-    pullDown: () => void
-    pullUpLoading: boolean
-    pullDownLoading: boolean
-    bounceTop: boolean // 是否支持向上吸顶
-    bounceBottom: boolean // 是否支持向下吸顶
+    direction?: string
+    refresh?: boolean
+    click?: boolean
+    scroll?: boolean // 是否有滚动处理逻辑
+    pullUp?: boolean // 是否有上拉处理逻辑
+    pullDown?: boolean // 是否有下拉处理逻辑
+    pullUpLoading?: boolean
+    pullDownLoading?: boolean
+    bounceTop?: boolean // 是否支持向上吸顶
+    bounceBottom?: boolean // 是否支持向下吸顶
   }>(),
   {
     direction: 'vertical',
     refresh: true,
-    // onScroll: () => {},
     click: true,
-    pullUp: () => {},
-    pullDown: () => {},
+    scroll: false,
+    pullUp: false,
+    pullDown: false,
     pullUpLoading: false,
     pullDownLoading: false,
     bounceTop: true,
@@ -39,84 +40,116 @@ const props = withDefaults(
   }
 )
 
+const {
+  direction,
+  refresh,
+  click,
+  scroll,
+  pullUp,
+  pullDown,
+  pullUpLoading,
+  pullDownLoading,
+  bounceTop,
+  bounceBottom,
+} = toRefs(props)
+
 const scrollContaninerRef = ref<HTMLDivElement | null>(null)
 
-const pullUpdisplayStyle = reactive<{ display: string }>({ display: '' })
-const pullDowndisplayStyle = reactive<{ display: string }>({ display: '' })
+const emit = defineEmits(['handleScorll', 'handlePullUp', 'handlePullDown'])
 
-const emit = defineEmits(['onScorll', 'refresh'])
+let bScroll: BScroll
 
-const pullUpDebounce = () => {
-  return debounce(props.pullUp, 500)
-}
-
-const pullDownDebounce = () => {
-  return debounce(props.pullDown, 500)
-}
-
-onMounted(() => {
-  const bScroll = new BScroll(scrollContaninerRef as any, {
-    scrollX: props.direction === 'horizontal',
-    scrollY: props.direction === 'vertical',
+const initScroll = () => {
+  bScroll = new BScroll(scrollContaninerRef as any, {
+    scrollX: direction.value === 'horizontal',
+    scrollY: direction.value === 'vertical',
     probeType: 3,
-    click: props.click,
+    click: click.value,
     bounce: {
-      top: props.bounceTop,
-      bottom: props.bounceBottom,
+      top: bounceTop.value,
+      bottom: bounceBottom.value,
     },
   })
 
-  if (!bScroll) return
-  bScroll.on('scroll', emit('onScorll') as any)
-
-  if (!bScroll || !props.pullUp) return
-  const handlePullUp = () => {
-    // 判断是否滑动到了底部
-    if (bScroll.y <= bScroll.maxScrollY + 100) {
-      pullUpDebounce()
+  if (scroll.value) {
+    const handleScorll = (pos: any) => {
+      emit('handleScorll', pos) as any
     }
+    bScroll.on('scroll', handleScorll)
   }
-  bScroll.on('scrollEnd', handlePullUp)
-  // return () => {
-  //   bScroll.value.off('scrollEnd', handlePullUp)
-  // }
 
-  if (!bScroll || !props.pullDown) return
-  const handlePullDown = (pos: any) => {
-    //判断用户的下拉动作
-    if (pos.y > 50) {
-      pullDownDebounce()
+  if (pullUp.value) {
+    const handlePullUp = (pos: any) => {
+      // 判断是否滑动到了底部
+      if (bScroll.y <= bScroll.maxScrollY + 100) {
+        debounce(emit('handlePullUp', pos) as any, 500)()
+      }
     }
+    bScroll.on('scrollEnd', handlePullUp)
   }
-  bScroll.on('touchEnd', handlePullDown)
-  // return () => {
-  //   bScroll.off('touchEnd', handlePullDown)
-  // }
 
-  if (props.refresh && bScroll) {
+  if (pullDown.value) {
+    const handlePullDown = (pos: any) => {
+      // 判断是否有了下拉动作
+      if (pos.y > 50) {
+        debounce(emit('handlePullDown', pos) as any, 500)()
+      }
+    }
+    bScroll.on('touchEnd', handlePullDown)
+  }
+
+  if (refresh.value) {
+    bScroll.scrollTo(0, 0)
     bScroll.refresh()
   }
+}
 
-  pullUpdisplayStyle.display = props.pullUpLoading ? '' : 'none'
-  pullDowndisplayStyle.display = props.pullDownLoading ? '' : 'none'
+onMounted(() => {
+  initScroll()
+})
+
+defineExpose({
+  enable() {
+    bScroll?.enable()
+  },
+  disable() {
+    bScroll?.disable()
+  },
+  refresh() {
+    bScroll?.refresh()
+    bScroll?.scrollTo(0, 0)
+  },
+  getBScroll() {
+    return bScroll
+  },
 })
 </script>
 
 <template>
-  <div class="container" ref="scrollContaninerRef">
-    {props.children} {/* 滑到底部加载动画 */}
-    <div class="pull-up-loading" :style="pullUpdisplayStyle">
+  <div class="scroll-container" ref="scrollContaninerRef">
+    <slot> </slot>
+    <div
+      class="pull-up-loading"
+      :style="{
+        display: pullUpLoading ? '' : 'none',
+      }"
+    >
       <Loading></Loading>
     </div>
     {/* 顶部下拉刷新动画 */}
-    <div class="pull-down-loading" :style="pullDowndisplayStyle">
+    <div
+      class="pull-down-loading"
+      :style="{
+        display: pullDownLoading ? '' : 'none',
+      }"
+    >
       <Loading2></Loading2>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.container {
+.scroll-container {
   width: 100%;
   height: 100%;
   overflow: hidden;

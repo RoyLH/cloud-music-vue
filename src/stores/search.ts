@@ -7,7 +7,7 @@ import { defineStore } from 'pinia'
 
 interface State {
   hotList: any[]
-  suggest: any[]
+  suggest: any
   songsList: any[]
   enterLoading: boolean
 }
@@ -15,7 +15,7 @@ interface State {
 export const useSearchStore = defineStore('search', {
   state: (): State => ({
     hotList: [],
-    suggest: [],
+    suggest: {},
     songsList: [],
     enterLoading: false,
   }),

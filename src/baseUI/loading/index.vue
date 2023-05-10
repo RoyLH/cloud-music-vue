@@ -9,12 +9,13 @@
 
 <style lang="scss" scoped>
 @keyframes loading {
-  from {
-    top: 0;
+  0%,
+  100% {
+    transform: scale(0);
   }
 
-  to {
-    top: 200px;
+  50% {
+    transform: scale(1);
   }
 }
 
@@ -30,9 +31,8 @@
     height: 60px;
     opacity: 0.6;
     border-radius: 50%;
-
     /* background-color: ${style['theme-color']}; */
-    background-color: #d44439;
+    background-color: var(--theme-color);
     animation: loading 1.4s infinite ease-in;
   }
 

@@ -25,7 +25,7 @@
   }
 }
 
-.loading-wrapper {
+.loading {
   height: 10px;
   width: 100%;
   margin: auto;
@@ -34,10 +34,8 @@
 
   > div {
     display: inline-block;
-
     /* background-color: ${style['theme-color']}; */
     background-color: #d44439;
-
     height: 100%;
     width: 1px;
     margin-right: 2px;

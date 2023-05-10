@@ -1,13 +1,53 @@
 <script setup lang="ts">
+import { onMounted, nextTick, toRefs, watch } from 'vue'
 import Swiper, { Autoplay, Navigation, Pagination } from 'swiper'
+
 import 'swiper/css/bundle'
+import 'swiper/css/autoplay'
 import 'swiper/css/pagination'
 
 Swiper.use([Autoplay, Navigation, Pagination])
 
-defineProps<{
+const props = defineProps<{
   bannerList: any[]
 }>()
+
+const { bannerList } = toRefs(props)
+
+const initSwiper = () => {
+  if (!bannerList.value.length) return
+
+  new Swiper('.slider-container', {
+    loop: true,
+    autoplay: {
+      delay: 3000,
+      disableOnInteraction: false,
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true,
+    },
+    observer: true,
+    observeParents: true,
+  })
+}
+
+onMounted(() => {
+  initSwiper()
+})
+
+watch(
+  bannerList,
+  async () => {
+    await nextTick()
+    initSwiper()
+  },
+  {
+    immediate: true,
+    deep: true,
+  }
+)
 </script>
 
 <template>
@@ -21,7 +61,7 @@ defineProps<{
           class="swiper-slide"
         >
           <div class="slider-nav">
-            <img src="slider.imageUrl" width="100%" height="100%" alt="推荐" />
+            <img :src="slider.imageUrl" width="100%" height="100%" alt="推荐" />
           </div>
         </div>
       </div>
@@ -44,9 +84,8 @@ defineProps<{
     top: -300px;
     height: 400px;
     width: 100%;
-
     /* background: ${style['theme-color']}; */
-    background: #d44439;
+    background: var(--theme-color);
     z-index: 1;
   }
 
@@ -63,6 +102,11 @@ defineProps<{
       display: block;
       width: 100%;
       height: 100%;
+
+      img {
+        width: 100px;
+        height: 100px;
+      }
     }
 
     .swiper-pagination-bullet-active {

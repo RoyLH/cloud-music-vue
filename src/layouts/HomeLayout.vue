@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRouter } from 'vue-router'
+import Player from '@/application/Player/index.vue'
+
 const router = useRouter()
-const tip = () => alert('用户中心正在开发中，敬请期待:)')
+const alertTip = () => alert('用户中心正在开发中，敬请期待:)')
 </script>
 
 <template>
   <div class="top">
-    <span className="iconfont menu" @click="tip"> &#xe65c; </span>
+    <span class="iconfont menu" @click="alertTip"> &#xe65c; </span>
     <span class="title">云音悦</span>
     <span class="iconfont search" @click="router.push('/search')">
       &#xe62b;
@@ -30,6 +32,7 @@ const tip = () => alert('用户中心正在开发中，敬请期待:)')
     </RouterLink>
   </div>
   <RouterView />
+  <Player />
 </template>
 
 <style lang="scss" scoped>
@@ -58,18 +61,20 @@ const tip = () => alert('用户中心正在开发中，敬请期待:)')
   justify-content: space-around;
   background: #d44439;
 
-  div {
+  a {
     flex: 1;
     padding: 2px 0;
     font-size: 14px;
     color: #e4e4e4;
 
-    &.selected {
-      span {
-        padding: 3px 0;
-        font-weight: 700;
-        color: #f1f1f1;
-        border-bottom: 2px solid #f1f1f1;
+    div {
+      &.selected {
+        span {
+          padding: 3px 0;
+          font-weight: 700;
+          color: #f1f1f1;
+          border-bottom: 2px solid #f1f1f1;
+        }
       }
     }
   }

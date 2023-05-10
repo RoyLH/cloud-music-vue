@@ -11,7 +11,7 @@ interface State {
   listOffset: number // 请求列表的偏移不是page，是个数
 }
 
-export const useSingerStore = defineStore('singers', {
+export const useSingersStore = defineStore('singers', {
   state: (): State => ({
     category: '',
     alpha: '',

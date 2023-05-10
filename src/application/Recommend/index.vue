@@ -1,30 +1,45 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-// import { useRecommendStore } from '@/stores/recommend'
+import { useRecommendStore } from '@/stores/recommend'
+import RecommendList from '@/components/list/index.vue'
+import { usePlayerStore } from '@/stores/player'
 import Scroll from '@/baseUI/scroll/index.vue'
-// import Slider from '@/components/slider/index.vue'
-// import { storeToRefs } from 'pinia'
+import Slider from '@/components/slider/index.vue'
+import { storeToRefs } from 'pinia'
+import { ref, onMounted } from 'vue'
 
-// const recommendStore = useRecommendStore()
-// const { bannerList, recommendList, enterLoading } = storeToRefs(recommendStore)
+const scrollRef = ref()
 
-// await recommendStore.getBannerList()
-// await recommendStore.getRecommendList()
+const { bannerList, recommendList, enterLoading } = storeToRefs(
+  useRecommendStore()
+)
+const { playList } = storeToRefs(usePlayerStore())
+
+const { getBannerList, getRecommendList } = useRecommendStore()
+
+onMounted(async () => {
+  if (!bannerList.value.length) await getBannerList()
+  if (!recommendList.value.length) await getRecommendList()
+
+  scrollRef.value!.refresh()
+})
 </script>
 
 <template>
-  <div class="content">
-    <Scroll class="list" onScroll="{forceCheck}">
+  <div
+    class="content"
+    ref="scrollRef"
+    :style="{ bottom: playList.length > 0 ? '60px' : '0' }"
+  >
+    <Scroll class="list">
       <div>
-        <!-- <Slider bannerList="bannerList"></Slider> -->
-        <!-- <RecommendList recommendList="recommendList"></RecommendList> -->
+        <Slider :bannerList="bannerList"></Slider>
+        <RecommendList :recommendList="recommendList"></RecommendList>
       </div>
     </Scroll>
-    {enterLoading ? (
-    <EnterLoading>
+    <EnterLoading v-if="enterLoading">
       <Loading></Loading>
     </EnterLoading>
-    ) : null}
     <RouterView />
   </div>
 </template>
@@ -34,7 +49,6 @@ import Scroll from '@/baseUI/scroll/index.vue'
   position: fixed;
   top: 94px;
   left: 0;
-
   /* bottom: ${(props: { play?: any }) => (props.play > 0 ? '60px' : 0)}; */
   bottom: 0;
   width: 100%;
