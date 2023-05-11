@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, toRefs, defineProps, watch, defineEmits } from 'vue'
 import { prefixStyle } from '@/api/utils'
+import { defineEmits, defineProps, ref, toRefs, watch } from 'vue'
 
 const props = defineProps<{
   percent: number
@@ -20,24 +20,17 @@ const transform = prefixStyle('transform') as any
 
 const progressBtnWidth = 16
 
-watch(
-  percent,
-  percent => {
-    if (percent >= 0 && percent <= 1 && !touch.value.initiated) {
-      const barWidth = progressBarRef.value.clientWidth - progressBtnWidth
-      const offsetWidth = percent * barWidth
+watch(percent, percent => {
+  if (percent >= 0 && percent <= 1 && !touch.value.initiated) {
+    const barWidth = progressBarRef.value.clientWidth - progressBtnWidth
+    const offsetWidth = percent * barWidth
 
-      progressRef.value.style.width = `${offsetWidth}px`
-      progressBtnRef.value.style[
-        transform
-      ] = `translate3d(${offsetWidth}px, 0, 0)`
-    }
-  },
-  {
-    immediate: true,
-    deep: true,
+    progressRef.value.style.width = `${offsetWidth}px`
+    progressBtnRef.value.style[
+      transform
+    ] = `translate3d(${offsetWidth}px, 0, 0)`
   }
-)
+})
 
 const _offset = (offsetWidth: number) => {
   progressRef.value.style.width = `${offsetWidth}px`

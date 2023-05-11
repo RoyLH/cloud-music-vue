@@ -269,10 +269,9 @@ const percentChange = (value: number) => {
           </div>
         </Transition>
       </div>
-      <Bottom class="bottom">
-        <List>
+      <div class="bottom">
+        <div class="list">
           <span>倍速听歌</span>
-          {list.map(item => { return (
           <div
             class="list-item"
             v-for="item in list"
@@ -282,8 +281,7 @@ const percentChange = (value: number) => {
           >
             {{ item.name }}
           </div>
-          ) })}
-        </List>
+        </div>
         <div class="progress-wrapper">
           <span class="time time-l">{{ formatPlayTime(currentTime) }}</span>
           <div class="progress-bar-wrapper">
@@ -318,7 +316,7 @@ const percentChange = (value: number) => {
             <i class="iconfont">&#xe640;</i>
           </div>
         </div>
-      </Bottom>
+      </div>
     </div>
   </Transition>
 </template>
