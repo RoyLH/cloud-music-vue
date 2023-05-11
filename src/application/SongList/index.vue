@@ -73,8 +73,8 @@ const songList = computed(() => {
 })
 
 const selectItem = (e: any, index: number) => {
-  changePlayList(songs)
-  changeSequencePlayList(songs)
+  changePlayList(songs.value)
+  changeSequencePlayList(songs.value)
   changeCurrentIndex(index)
 
   emit('musicAnimation', e.clientX, e.clientY)

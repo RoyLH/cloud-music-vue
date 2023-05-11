@@ -39,16 +39,16 @@ export const usePlayerStore = defineStore('player', {
       this.playing = payload
     },
     changeSequencePlayList(payload: any) {
-      this.playList = payload
+      this.sequencePlayList = payload
     },
     changePlayList(payload: any) {
-      this.sequencePlayList = payload
+      this.playList = payload
     },
     changePlayMode(payload: any) {
       this.mode = payload
     },
     changeSpeed(payload: any) {
-      this.currentIndex = payload
+      this.speed = payload
     },
     changeCurrentIndex(payload: any) {
       this.currentIndex = payload

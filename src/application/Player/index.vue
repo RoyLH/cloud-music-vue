@@ -6,7 +6,7 @@ import { findIndex, getSongUrl, isEmptyObject, shuffle } from '@/api/utils'
 import Toast from '@/baseUI/toast/index.vue'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watch } from 'vue'
 import MiniPlayer from './mini-player/index.vue'
 import NormalPlayer from './normal-player/index.vue'
 import PlayList from './play-list/index.vue'
@@ -209,26 +209,55 @@ const clearPreSong = () => {
   preSong.value = {}
 }
 
-watchEffect(() => {
+// watchEffect(() => {
+//   console.log(playList.value)
+//   if (
+//     !playList.value.length ||
+//     currentIndex.value === -1 ||
+//     !playList.value[currentIndex.value] ||
+//     playList.value[currentIndex.value].id === preSong.value.id ||
+//     !songReady.value
+//   )
+//     return
+
+//   songReady.value = false
+
+//   const current = playList.value[currentIndex.value]
+//   changeCurrentSong(current)
+//   preSong.value = current
+//   currentPlayingLyric.value = ''
+
+//   audioRef.value.src = getSongUrl(current.id)
+//   audioRef.value.autoplay = true
+//   audioRef.value.playbackRate = speed
+
+//   changePlayingState(true)
+//   getLyric(current.id)
+
+//   currentTime.value = 0
+//   duration.value = (current.dt / 1000) | 0
+// })
+
+watch([playList, currentIndex], ([playList, currentIndex]) => {
   if (
-    !playList.value.length ||
-    currentIndex.value === -1 ||
-    !playList.value[currentIndex.value] ||
-    playList.value[currentIndex.value].id === preSong.value.id ||
+    !playList.length ||
+    currentIndex === -1 ||
+    !playList[currentIndex] ||
+    playList[currentIndex].id === preSong.value?.id ||
     !songReady.value
   )
     return
 
   songReady.value = false
 
-  const current = playList.value[currentIndex.value]
+  const current = playList[currentIndex]
   changeCurrentSong(current)
   preSong.value = current
   currentPlayingLyric.value = ''
 
   audioRef.value.src = getSongUrl(current.id)
   audioRef.value.autoplay = true
-  audioRef.value.playbackRate = speed
+  audioRef.value.playbackRate = speed.value
 
   changePlayingState(true)
   getLyric(current.id)
