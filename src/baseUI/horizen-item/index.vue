@@ -13,7 +13,7 @@ import Scroll from '@/baseUI/scroll/index.vue'
 const props = withDefaults(
   defineProps<{
     list?: any[]
-    oldVal?: any
+    oldVal?: string
     title?: string
   }>(),
   {
@@ -27,11 +27,12 @@ const emit = defineEmits(['handleClick'])
 
 const { list, oldVal, title } = toRefs(props)
 
-const categoryRef = ref()
 const scrollRef = ref()
+const categoryRef = ref()
 
 onMounted(async () => {
-  const tagElems = categoryRef.value.querySelectorAll('span')
+  const categoryDOM = categoryRef.value!
+  const tagElems = categoryDOM.querySelectorAll('span')
 
   let totalWidth = 0
   Array.from(tagElems).forEach((ele: any) => {
@@ -40,7 +41,7 @@ onMounted(async () => {
 
   // 选中项的 border-left + border-right
   totalWidth += 2
-  categoryRef.value.style.width = `${totalWidth}px`
+  categoryDOM.style.width = `${totalWidth}px`
 
   await nextTick()
   scrollRef.value.refresh()
@@ -52,11 +53,11 @@ const handleClick = (item: any) => {
 </script>
 
 <template>
-  <Scroll :direction="'horizontal'">
+  <Scroll ref="scrollRef" :direction="'horizontal'">
     <div ref="categoryRef">
       <div class="list">
         <span>{{ title }}</span>
-        <div
+        <span
           v-for="item in list"
           class="list-item"
           :key="item.key"
@@ -64,7 +65,7 @@ const handleClick = (item: any) => {
           @click="handleClick(item)"
         >
           {{ item.name }}
-        </div>
+        </span>
       </div>
     </div>
   </Scroll>
@@ -84,7 +85,7 @@ const handleClick = (item: any) => {
     padding: 5px 0;
     color: grey;
     /* font-size: ${style['font-size-m']}; */
-    font-size: var(font-size-m);
+    font-size: var(--font-size-m);
     /* vertical-align: middle; */
   }
 }
@@ -92,7 +93,7 @@ const handleClick = (item: any) => {
 .list-item {
   flex: 0 0 auto;
   /* font-size: ${style['font-size-m']}; */
-  font-size: var(font-size-m);
+  font-size: var(--font-size-m);
   padding: 5px;
   border-radius: 10px;
 

@@ -104,14 +104,14 @@ watch(
       height: 100%;
 
       img {
-        width: 100px;
-        height: 100px;
+        width: 100%;
+        height: 100%;
       }
     }
 
     .swiper-pagination-bullet-active {
       /* background: ${style['theme-color']}; */
-      background: #d44439;
+      background: var(--theme-color);
     }
   }
 }

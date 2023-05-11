@@ -5,8 +5,9 @@ import VueLazyLoad from 'vue3-lazyload'
 import App from './App.vue'
 import router from './router'
 
-import './assets/iconfont/iconfont.css'
-import './style.css'
+import '@/assets/iconfont/iconfont.css'
+import '@/fix.css'
+import '@/style.css'
 
 const app = createApp(App)
 

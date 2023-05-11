@@ -14,7 +14,7 @@ defineEmits(['musicAnimation'])
 
 <template>
   <div>
-    <div class="top-desc" background="{currentAlbum.coverImgUrl}">
+    <div class="top-desc">
       <div
         class="background"
         :style="{

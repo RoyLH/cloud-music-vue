@@ -26,12 +26,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div
-    class="content"
-    ref="scrollRef"
-    :style="{ bottom: playList.length > 0 ? '60px' : '0' }"
-  >
-    <Scroll class="list">
+  <div class="content" :style="{ bottom: playList.length > 0 ? '60px' : '0' }">
+    <Scroll ref="scrollRef">
       <div>
         <Slider :bannerList="bannerList"></Slider>
         <RecommendList :recommendList="recommendList"></RecommendList>

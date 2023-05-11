@@ -53,14 +53,16 @@ const {
   bounceBottom,
 } = toRefs(props)
 
-const scrollContaninerRef = ref<HTMLDivElement | null>(null)
+const scrollContaninerRef = ref()
 
 const emit = defineEmits(['handleScorll', 'handlePullUp', 'handlePullDown'])
 
 let bScroll: BScroll
 
 const initScroll = () => {
-  bScroll = new BScroll(scrollContaninerRef as any, {
+  if (!scrollContaninerRef.value) return
+
+  bScroll = new BScroll(scrollContaninerRef.value as any, {
     scrollX: direction.value === 'horizontal',
     scrollY: direction.value === 'vertical',
     probeType: 3,
@@ -73,8 +75,9 @@ const initScroll = () => {
 
   if (scroll.value) {
     const handleScorll = (pos: any) => {
-      emit('handleScorll', pos) as any
+      emit('handleScorll', pos)
     }
+
     bScroll.on('scroll', handleScorll)
   }
 
@@ -82,9 +85,10 @@ const initScroll = () => {
     const handlePullUp = (pos: any) => {
       // 判断是否滑动到了底部
       if (bScroll.y <= bScroll.maxScrollY + 100) {
-        debounce(emit('handlePullUp', pos) as any, 500)()
+        debounce(emit('handlePullUp', pos) as any, 500)
       }
     }
+
     bScroll.on('scrollEnd', handlePullUp)
   }
 
@@ -92,9 +96,10 @@ const initScroll = () => {
     const handlePullDown = (pos: any) => {
       // 判断是否有了下拉动作
       if (pos.y > 50) {
-        debounce(emit('handlePullDown', pos) as any, 500)()
+        debounce(emit('handlePullDown', pos) as any, 500)
       }
     }
+
     bScroll.on('touchEnd', handlePullDown)
   }
 
@@ -127,7 +132,7 @@ defineExpose({
 
 <template>
   <div class="scroll-container" ref="scrollContaninerRef">
-    <slot> </slot>
+    <slot></slot>
     <div
       class="pull-up-loading"
       :style="{
@@ -136,7 +141,6 @@ defineExpose({
     >
       <Loading></Loading>
     </div>
-    {/* 顶部下拉刷新动画 */}
     <div
       class="pull-down-loading"
       :style="{

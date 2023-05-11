@@ -5,6 +5,7 @@ import {
   withDefaults,
   defineEmits,
   watchEffect,
+  // onMounted,
   computed,
 } from 'vue'
 import { ONE_PAGE_COUNT } from '@/api/config'
@@ -61,7 +62,7 @@ const songList = computed(() => {
   // 判断页数是否超过总数
   const end = usePageSplit.value
     ? startIndex.value + ONE_PAGE_COUNT
-    : list.length
+    : songs.value.length
 
   for (let i = 0; i < end; i++) {
     if (i >= songs.value.length) break
@@ -81,12 +82,7 @@ const selectItem = (e: any, index: number) => {
 </script>
 
 <template>
-  <div
-    class="song-list"
-    :style="{
-      background: showBackground ? 'fff' : '',
-    }"
-  >
+  <div class="song-list" :style="{ background: showBackground ? 'fff' : '' }">
     <div class="first-line">
       <div class="play-all" @click="selectItem($event, 0)">
         <i class="iconfont">&#xe6e3;</i>
@@ -98,6 +94,9 @@ const selectItem = (e: any, index: number) => {
         <i class="iconfont">&#xe62d;</i>
         <span>收藏({{ Math.floor(collectCount / 1000) / 10 }}万)</span>
       </div>
+      <!-- <div class="collected">
+        <span>已收藏({Math.floor(count/1000)/10}万)</span>
+      </div> -->
     </div>
     <ul class="song-item">
       <li

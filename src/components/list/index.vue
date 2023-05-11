@@ -7,6 +7,7 @@ defineProps<{
 }>()
 
 const router = useRouter()
+
 const enterDetail = (id: string) => {
   router.push(`/recommend/${id}`)
 }

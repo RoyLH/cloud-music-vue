@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { filterIndex } from '@/api/utils'
+import { useRouter, RouterView } from 'vue-router'
+import { useRankStore } from '@/stores/rank'
+import { usePlayerStore } from '@/stores/player'
+import { onMounted, ref, computed, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
 import EnterLoading from '@/baseUI/enter-loading/index.vue'
 import Loading from '@/baseUI/loading/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
-import { useRouter } from 'vue-router'
-import { useRankStore } from '@/stores/rank'
-import { usePlayerStore } from '@/stores/player'
-import { onMounted, computed } from 'vue'
-import { storeToRefs } from 'pinia'
 
 const { rankList, loading } = storeToRefs(useRankStore())
 const { playList } = storeToRefs(usePlayerStore())
@@ -15,20 +15,22 @@ const { playList } = storeToRefs(usePlayerStore())
 const { getRankList } = useRankStore()
 
 const router = useRouter()
-
-const globalStartIndex = filterIndex(rankList.value)
+const scrollRef = ref()
 
 const officialList = computed(() => {
-  return rankList.value.slice(0, globalStartIndex)
+  return rankList.value.slice(0, filterIndex(rankList.value))
 })
 const globalList = computed(() => {
-  return rankList.value.slice(globalStartIndex)
+  return rankList.value.slice(filterIndex(rankList.value))
 })
 
 onMounted(async () => {
   if (!rankList.value.length) {
     await getRankList()
   }
+
+  await nextTick()
+  scrollRef.value.refresh()
 })
 
 const enterDetail = (detail: any) => {
@@ -39,23 +41,21 @@ const enterDetail = (detail: any) => {
 <template>
   <div
     class="container"
-    :style="{
-      bottom: playList.length > 0 ? '60px' : '0',
-    }"
+    :style="{ bottom: playList.length > 0 ? '60px' : '0' }"
   >
-    <Scroll>
+    <Scroll ref="scrollRef">
       <div>
         <h1 class="offical" :style="{ display: loading ? 'none' : '' }">
           官方榜
         </h1>
-        <div class="list" :style="{ display: '' }">
+        <div class="list">
           <div
-            class="ListItem"
+            class="list-item"
             v-for="(item, index) in officialList"
             :key="`${item.coverImgId}${index}`"
             :tracks="item.tracks"
-            @click="enterDetail(item)"
             :style="{ display: item.tracks.length ? 'flex' : '' }"
+            @click="enterDetail(item)"
           >
             <div
               class="img-wrapper"
@@ -78,7 +78,6 @@ const enterDetail = (detail: any) => {
         <h1 class="global" :style="{ display: loading ? 'none' : '' }">
           全球榜
         </h1>
-
         <div class="list" :style="{ display: 'flex' }">
           <div
             class="list-item"
@@ -105,14 +104,13 @@ const enterDetail = (detail: any) => {
               </li>
             </ul>
           </div>
-          ) })}
         </div>
         <EnterLoading v-if="loading">
           <Loading></Loading>
         </EnterLoading>
       </div>
     </Scroll>
-    <Outlet />
+    <RouterView />
   </div>
 </template>
 

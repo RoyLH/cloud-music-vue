@@ -34,14 +34,6 @@ const { playList } = storeToRefs(usePlayerStore())
 const { changeEnterLoading, getAlbumList, changePullUpLoading } =
   useAlbumStore()
 
-onMounted(async () => {
-  changeEnterLoading(true)
-  await getAlbumList(id as string)
-
-  await nextTick()
-  scrollRef.value.refresh()
-})
-
 const handleScroll = (pos: any) => {
   const minScrollY = -HEADER_HEIGHT
   const percent = Math.abs(pos.y / minScrollY)
@@ -73,16 +65,22 @@ const handleBack = () => {
 const musicAnimation = (x: any, y: any) => {
   musicNoteRef.value.startAnimation({ x, y })
 }
+
+onMounted(async () => {
+  changeEnterLoading(true)
+  await getAlbumList(id as string)
+
+  await nextTick()
+  scrollRef.value.refresh()
+})
 </script>
 
 <template>
-  <Transition :duration="300" name="fly" appear @afterLeave="router.back()">
+  <Transition appear name="fly" :duration="300" @afterLeave="router.back()">
     <div
       v-if="showStatus"
       class="container"
-      :style="{
-        bottom: playList.length > 0 ? '60px' : '0',
-      }"
+      :style="{ bottom: playList.length > 0 ? '60px' : '0' }"
     >
       <Header
         ref="headerRef"

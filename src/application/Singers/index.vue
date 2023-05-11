@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { alphaTypes, categoryTypes } from '@/api/config'
-import Horizen from '@/baseUI/horizen-item/index.vue'
-import Loading from '@/baseUI/loading/index.vue'
-import Scroll from '@/baseUI/scroll/index.vue'
-import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useSingersStore } from '@/stores/singers'
 import { usePlayerStore } from '@/stores/player'
+import { alphaTypes, categoryTypes } from '@/api/config'
+import Scroll from '@/baseUI/scroll/index.vue'
+import Horizen from '@/baseUI/horizen-item/index.vue'
+import Loading from '@/baseUI/loading/index.vue'
+import EnterLoading from '@/baseUI/enter-loading/index.vue'
 
 const loadingImgUrl = new URL('./singer.png', import.meta.url).href
-
-const scrollRef = ref<any>(null)
-const router = useRouter()
 
 const {
   alpha,
@@ -30,13 +27,18 @@ const { playList } = storeToRefs(usePlayerStore())
 const {
   changeCategory,
   changeAlpha,
+  changeListOffset,
   changePullUpLoading,
+  changePullDownLoading,
   getSingerList,
   getHotSingerList,
-  refreshMoreHotSingerList,
   refreshMoreSingerList,
-  changeListOffset,
+  refreshMoreHotSingerList,
 } = useSingersStore()
+
+const scrollRef = ref<any>(null)
+
+const router = useRouter()
 
 const getHotSinger = async () => {
   await getHotSingerList()
@@ -65,7 +67,7 @@ const pullUpRefresh = async (hot: boolean) => {
 
 // 顶部下拉刷新
 const pullDownRefresh = async (category: string, alpha: string) => {
-  changePullUpLoading(true)
+  changePullDownLoading(true)
   changeListOffset(0)
 
   if (category === '' && alpha === '') {
@@ -75,22 +77,25 @@ const pullDownRefresh = async (category: string, alpha: string) => {
   }
 }
 
-onMounted(() => {
-  if (!singerList.value.length && !category && !alpha) {
-    getHotSinger()
+onMounted(async () => {
+  if (!singerList.value.length && !category.value && !alpha.value) {
+    await getHotSinger()
   }
+
+  await nextTick()
+  scrollRef.value.refresh()
 })
 
 const enterDetail = (id: string) => {
   router.push(`/singers/${id}`)
 }
 
-const handlePullUp = () => {
-  pullUpRefresh(category.value === '')
+const handlePullUp = async () => {
+  await pullUpRefresh(category.value === '')
 }
 
-const handlePullDown = () => {
-  pullDownRefresh(category.value, alpha.value)
+const handlePullDown = async () => {
+  await pullDownRefresh(category.value, alpha.value)
 }
 
 const handleUpdateCategory = async (newVal: string) => {
@@ -100,10 +105,10 @@ const handleUpdateCategory = async (newVal: string) => {
   scrollRef.value.refresh()
 }
 
-const handleUpdateAlpha = (newVal: string) => {
+const handleUpdateAlpha = async (newVal: string) => {
   if (alpha.value === newVal) return
 
-  updateAlpha(newVal)
+  await updateAlpha(newVal)
   scrollRef.value.refresh()
 }
 </script>
@@ -126,24 +131,22 @@ const handleUpdateAlpha = (newVal: string) => {
     </div>
     <div
       class="list-container"
-      :style="{
-        bottom: playList.length ? '60px' : 0,
-      }"
+      :style="{ bottom: playList.length ? '60px' : '0' }"
     >
       <Scroll
         ref="scrollRef"
         :pullUp="true"
         :pullDown="true"
-        :handlePullUp="handlePullUp"
-        :handlePullDown="handlePullDown"
         :pullUpLoading="pullUpLoading"
         :pullDownLoading="pullDownLoading"
+        @handlePullUp="handlePullUp"
+        @handlePullDown="handlePullDown"
       >
         <div class="list">
           <div
             v-for="(item, index) in singerList"
             class="list-item"
-            :key="item.accountId + '' + index"
+            :key="`${item.accountId} ${index}`"
             @click="enterDetail(item.id)"
           >
             <div class="img-wrapper">
