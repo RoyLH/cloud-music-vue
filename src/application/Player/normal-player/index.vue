@@ -469,11 +469,11 @@ const percentChange = (value: number) => {
     transition: none;
   }
 
-  .fade-exit-active {
+  .fade-leave-active {
     opacity: 0;
   }
 
-  .fade-exit-to {
+  .fade-leave-to {
     opacity: 0;
   }
 }
