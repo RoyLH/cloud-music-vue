@@ -4,7 +4,7 @@ import { defineProps, defineEmits, withDefaults } from 'vue'
 withDefaults(
   defineProps<{
     title: string
-    isMarquee: boolean
+    isMarquee?: boolean
   }>(),
   {
     title: '标题',

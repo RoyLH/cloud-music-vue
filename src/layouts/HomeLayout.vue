@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView, RouterLink, useRouter } from 'vue-router'
-// import Player from '@/application/Player/index.vue'
+import Player from '@/application/Player/index.vue'
 
 const router = useRouter()
 const alertTip = () => alert('用户中心正在开发中，敬请期待:)')
@@ -32,7 +32,7 @@ const alertTip = () => alert('用户中心正在开发中，敬请期待:)')
     </RouterLink>
   </div>
   <RouterView />
-  <!-- <Player /> -->
+  <Player />
 </template>
 
 <style lang="scss" scoped>

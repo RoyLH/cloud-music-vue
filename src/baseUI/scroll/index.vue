@@ -55,7 +55,7 @@ const {
 
 const scrollContaninerRef = ref()
 
-const emit = defineEmits(['handleScorll', 'handlePullUp', 'handlePullDown'])
+const emit = defineEmits(['handleScroll', 'handlePullUp', 'handlePullDown'])
 
 let bScroll: BScroll
 
@@ -74,11 +74,11 @@ const initScroll = () => {
   })
 
   if (scroll.value) {
-    const handleScorll = (pos: any) => {
-      emit('handleScorll', pos)
+    const handleScroll = (pos: any) => {
+      emit('handleScroll', pos)
     }
 
-    bScroll.on('scroll', handleScorll)
+    bScroll.on('scroll', handleScroll)
   }
 
   if (pullUp.value) {

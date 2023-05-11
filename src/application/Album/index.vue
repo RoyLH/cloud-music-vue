@@ -37,16 +37,16 @@ const { changeEnterLoading, getAlbumList, changePullUpLoading } =
 const handleScroll = (pos: any) => {
   const minScrollY = -HEADER_HEIGHT
   const percent = Math.abs(pos.y / minScrollY)
-  const headerDom = headerRef.value!
+
   if (pos.y < minScrollY) {
-    headerDom.style.backgroundColor = '#d44439'
-    headerDom.style.opacity = String(Math.min(1, (percent - 1) / 2))
+    headerRef.value.$el.style.backgroundColor = '#d44439'
+    headerRef.value.$el.style.opacity = String(Math.min(1, (percent - 1) / 2))
 
     title.value = currentAlbum.value && currentAlbum.value.name
     isMarquee.value = true
   } else {
-    headerDom.style.backgroundColor = ''
-    headerDom.style.opacity = '1'
+    headerRef.value.$el.style.backgroundColor = ''
+    headerRef.value.$el.style.opacity = '1'
 
     title.value = '歌单'
     isMarquee.value = false

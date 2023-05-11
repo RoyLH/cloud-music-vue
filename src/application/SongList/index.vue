@@ -4,8 +4,8 @@ import {
   toRefs,
   withDefaults,
   defineEmits,
-  watchEffect,
-  // onMounted,
+  // watchEffect,
+  onMounted,
   computed,
 } from 'vue'
 import { ONE_PAGE_COUNT } from '@/api/config'
@@ -22,7 +22,7 @@ const props = withDefaults(
     showBackground?: boolean
   }>(),
   {
-    loading: true,
+    loading: false,
   }
 )
 
@@ -42,19 +42,19 @@ const startIndex = ref(0)
 const { changePlayList, changeCurrentIndex, changeSequencePlayList } =
   usePlayerStore()
 
-// onMounted(() => {
-//   if (!loading.value) return
-//   if (startIndex.value + 1 + ONE_PAGE_COUNT >= songs.value.length) return
-
-//   startIndex.value = startIndex.value + ONE_PAGE_COUNT
-// })
-
-watchEffect(() => {
+onMounted(() => {
   if (!loading.value) return
   if (startIndex.value + 1 + ONE_PAGE_COUNT >= songs.value.length) return
 
   startIndex.value = startIndex.value + ONE_PAGE_COUNT
 })
+
+// watchEffect(() => {
+//   if (!loading.value) return
+//   if (startIndex.value + 1 + ONE_PAGE_COUNT >= songs.value.length) return
+
+//   startIndex.value = startIndex.value + ONE_PAGE_COUNT
+// })
 
 const songList = computed(() => {
   const list = []

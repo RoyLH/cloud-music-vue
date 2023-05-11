@@ -14,7 +14,9 @@ import { usePlayerStore } from '@/stores/player'
 
 const initialHeight = ref(0)
 const showStatus = ref(true)
+
 const router = useRouter()
+
 const {
   params: { id },
 } = useRoute()
@@ -39,52 +41,52 @@ onMounted(async () => {
   changeEnterLoading(true)
   await getSingerInfo(id as string)
 
-  const h = imageWrapperRef.value?.offsetHeight
+  const h = imageWrapperRef.value.offsetHeight
   initialHeight.value = h
+
   songScrollWrapperRef.value.style.top = `${h - OFFSET}px`
 
-  //把遮罩先放在下面，以裹住歌曲列表
+  // 把遮罩先放在下面，以裹住歌曲列表
   layerRef.value.style.top = `${h - OFFSET}px`
+
   songScrollRef.value.refresh()
 })
 
 const handleScroll = (pos: any) => {
-  const height = initialHeight.value!
   const newY = pos.y
-  const imageDOM = imageWrapperRef.value!
-  const buttonDOM = collectButtonRef.value!
-  const headerDOM = headerRef.value!
-  const layerDOM = layerRef.value!
-  const minScrollY = -(height - OFFSET) + HEADER_HEIGHT
 
-  const percent = Math.abs(newY / height)
+  const minScrollY = -(initialHeight.value - OFFSET) + HEADER_HEIGHT
+
+  const percent = Math.abs(newY / initialHeight.value)
 
   // 说明: 在歌手页的布局中，歌单列表其实是没有自己的背景的，layerDOM其实是起一个遮罩的作用，给歌单内容提供白色背景
   // 因此在处理的过程中，随着内容的滚动，遮罩也跟着移动
   if (newY > 0) {
     // 处理往下拉的情况,效果：图片放大，按钮跟着偏移
-    imageDOM.style['transform'] = `scale(${1 + percent})`
-    buttonDOM.style['transform'] = `translate3d(0, ${newY}px, 0)`
-    layerDOM.style.top = `${height - OFFSET + newY}px`
+    imageWrapperRef.value.style['transform'] = `scale(${1 + percent})`
+    collectButtonRef.value.style['transform'] = `translate3d(0, ${newY}px, 0)`
+    layerRef.value.style.top = `${initialHeight.value - OFFSET + newY}px`
   } else if (newY >= minScrollY) {
     // 往上滑动，但是还没超过Header部分
-    layerDOM.style.top = `${height - OFFSET - Math.abs(newY)}px`
-    layerDOM.style.zIndex = 1
-    imageDOM.style.paddingTop = '75%'
-    imageDOM.style.height = 0
-    imageDOM.style.zIndex = -1
-    buttonDOM.style['transform'] = `translate3d(0, ${newY}px, 0)`
-    buttonDOM.style['opacity'] = `${1 - percent * 2}`
+    layerRef.value.style.top = `${
+      initialHeight.value - OFFSET - Math.abs(newY)
+    }px`
+    layerRef.value.style.zIndex = 1
+    imageWrapperRef.value.style.paddingTop = '75%'
+    imageWrapperRef.value.style.height = 0
+    imageWrapperRef.value.style.zIndex = -1
+    collectButtonRef.value.style['transform'] = `translate3d(0, ${newY}px, 0)`
+    collectButtonRef.value.style['opacity'] = `${1 - percent * 2}`
   } else if (newY < minScrollY) {
     // 往上滑动，但是超过Header部分
-    layerDOM.style.top = `${HEADER_HEIGHT - OFFSET}px`
-    layerDOM.style.zIndex = 1
+    layerRef.value.style.top = `${HEADER_HEIGHT - OFFSET}px`
+    layerRef.value.style.zIndex = 1
     // 防止溢出的歌单内容遮住Header
-    headerDOM.style.zIndex = 100
+    headerRef.value.style.zIndex = 100
     // 此时图片高度与Header一致
-    imageDOM.style.height = `${HEADER_HEIGHT}px`
-    imageDOM.style.paddingTop = 0
-    imageDOM.style.zIndex = 99
+    imageWrapperRef.value.style.height = `${HEADER_HEIGHT}px`
+    imageWrapperRef.value.style.paddingTop = 0
+    imageWrapperRef.value.style.zIndex = 99
   }
 }
 
@@ -94,8 +96,8 @@ const musicAnimation = (x: number, y: number) => {
 </script>
 
 <template>
-  <Transition :duration="300" name="fly" appear @afterLeave="router.back">
-    <div class="container" v-if="showStatus">
+  <Transition :duration="300" name="fly" appear @afterLeave="router.back()">
+    <div v-if="showStatus" class="container">
       <Header
         ref="headerRef"
         :title="artist.name"
@@ -105,24 +107,24 @@ const musicAnimation = (x: number, y: number) => {
         class="img-wrapper"
         ref="imageWrapperRef"
         :style="{
-          background: `url(${artist.picUrl})`,
+          backgroundImage: `url(${artist.picUrl})`,
         }"
       >
         <div class="filter"></div>
       </div>
-      <div class="collect-button" ref="collectButtonRef">
+      <div ref="collectButtonRef" class="collect-button">
         <i class="iconfont">&#xe62d;</i>
         <span class="text">收藏</span>
       </div>
-      <div class="bg-layer" ref="layerRef"></div>
+      <div ref="layerRef" class="bg-layer"></div>
       <div
-        class="song-list-wrapper"
         ref="songScrollWrapperRef"
+        class="song-list-wrapper"
         :style="{
           bottom: playList.length > 0 ? '60px' : '0',
         }"
       >
-        <Scroll :scroll="true" ref="songScrollRef" @handleScoll="handleScroll">
+        <Scroll ref="songScrollRef" :scroll="true" @handleScoll="handleScroll">
           <SongsList
             :songs="songsOfArtist"
             :showCollect="false"
@@ -131,10 +133,10 @@ const musicAnimation = (x: number, y: number) => {
           ></SongsList>
         </Scroll>
       </div>
-      <EnterLoading :style="{ zIndex: 100 }" v-if="loading">
+      <EnterLoading v-if="loading" :style="{ zIndex: 100 }">
         <Loading></Loading>
       </EnterLoading>
-      <MusicNote ref="{musicNoteRef}"></MusicNote>
+      <MusicNote ref="musicNoteRef"></MusicNote>
     </div>
   </Transition>
 </template>
