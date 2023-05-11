@@ -39,18 +39,18 @@ const duration = ref(0)
 const currentPlayingLyric = ref('')
 const modeText = ref('')
 const preSong = ref()
+const currentLyric = ref()
+const currentLineNum = ref(0)
+const songReady = ref(true)
+
+const audioRef = ref()
+const toastRef = ref()
 
 const percent = computed(() => {
   return isNaN(currentTime.value / duration.value)
     ? 0
     : currentTime.value / duration.value
 })
-
-const audioRef = ref()
-const toastRef = ref()
-const currentLyric = ref()
-const currentLineNum = ref(0)
-const songReady = ref(true)
 
 const handleLyric = ({ lineNum, txt }: any) => {
   if (!currentLyric.value) return
@@ -59,7 +59,7 @@ const handleLyric = ({ lineNum, txt }: any) => {
   currentPlayingLyric.value = txt
 }
 
-const getLyric = (id: string) => {
+const getLyric = async (id: string) => {
   let lyric = ''
 
   if (currentLyric.value) {
@@ -72,7 +72,7 @@ const getLyric = (id: string) => {
   }, 3000)
 
   try {
-    const { lrc }: any = getLyricRequest(id)
+    const { lrc }: any = await getLyricRequest(id)
     lyric = lrc && lrc.lyric
 
     if (!lyric) {
@@ -191,6 +191,7 @@ const changeMode = () => {
   changePlayMode(newMode)
   toastRef.value.show()
 }
+
 const handleError = () => {
   songReady.value = true
   handleNext()
@@ -238,7 +239,7 @@ const clearPreSong = () => {
 //   duration.value = (current.dt / 1000) | 0
 // })
 
-watch([playList, currentIndex], ([playList, currentIndex]) => {
+watch([playList, currentIndex], async ([playList, currentIndex]) => {
   if (
     !playList.length ||
     currentIndex === -1 ||
@@ -260,7 +261,7 @@ watch([playList, currentIndex], ([playList, currentIndex]) => {
   audioRef.value.playbackRate = speed.value
 
   changePlayingState(true)
-  getLyric(current.id)
+  await getLyric(current.id)
 
   currentTime.value = 0
   duration.value = (current.dt / 1000) | 0
@@ -276,7 +277,7 @@ watch(fullScreen, fullScreen => {
   if (currentLyric.value && currentLyric.value.lines.length) {
     handleLyric({
       lineNum: currentLineNum.value,
-      txt: currentLyric.value.current.lines[currentLineNum.value].txt,
+      txt: currentLyric.value.lines[currentLineNum.value].txt,
     })
   }
 })
@@ -304,7 +305,7 @@ watch(fullScreen, fullScreen => {
       @onProgressChange="onProgressChange"
       @clickPlaying="clickPlaying"
       @toggleFullScreenDispatch="changeFullScreen"
-      @togglePlayListDispatch="changePlayList"
+      @togglePlayListDispatch="changeShowPlayList"
       @clickSpeed="clickSpeed"
     ></NormalPlayer>
     <MiniPlayer

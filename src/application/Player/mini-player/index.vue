@@ -76,7 +76,7 @@ const afterLeave = (el: any) => {
           </template>
         </ProgressCircle>
       </div>
-      <div class="control" @click.stop="$emit('clickPlaying', true)">
+      <div class="control" @click.stop="$emit('togglePlayList', true)">
         <i class="iconfont">&#xe640;</i>
       </div>
     </div>

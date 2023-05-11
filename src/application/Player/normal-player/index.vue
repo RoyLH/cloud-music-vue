@@ -73,11 +73,11 @@ watch(
     } else {
       bScroll.scrollTo(0, 0, 1000)
     }
-  },
-  {
-    immediate: true,
-    deep: true,
   }
+  // {
+  //   immediate: true,
+  //   deep: true,
+  // }
 )
 
 const getPlayMode = () => {
@@ -112,7 +112,7 @@ const _getPosAndScale = () => {
 }
 
 const beforeEnter = async (el: any) => {
-  normalPlayerRef.value.style.display = 'block'
+  el.style.display = 'block'
   const { x, y, scale } = _getPosAndScale()
 
   const animation = {

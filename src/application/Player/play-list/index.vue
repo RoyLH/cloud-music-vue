@@ -159,7 +159,7 @@ const beforeLeave = (el: any) => {
 
 const leave = (el: any) => {
   el.querySelector('.list-wrapper').style['transition'] = 'all 0.3s'
-  el.querySelector('.list-wrapper').value.style[
+  el.querySelector('.list-wrapper').style[
     transform
   ] = `translate3d(0px, 100%, 0px)`
 }
