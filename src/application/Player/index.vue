@@ -4,12 +4,12 @@ import Lyric from '@/api/lyric-parser'
 import { getLyricRequest } from '@/api/request'
 import { findIndex, getSongUrl, isEmptyObject, shuffle } from '@/api/utils'
 import Toast from '@/baseUI/toast/index.vue'
-import { ref, watch, watchEffect } from 'vue'
+import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
+import { computed, ref, watch, watchEffect } from 'vue'
 import MiniPlayer from './mini-player/index.vue'
 import NormalPlayer from './normal-player/index.vue'
 import PlayList from './play-list/index.vue'
-import { usePlayerStore } from '@/stores/player'
 
 const {
   fullScreen,
@@ -38,16 +38,16 @@ const currentTime = ref(0)
 const duration = ref(0)
 const currentPlayingLyric = ref('')
 const modeText = ref('')
+const preSong = ref()
 
-const percent = isNaN(currentTime.value / duration.value)
-  ? 0
-  : currentTime.value / duration.value
-
-const preSong = ref<any>({})
+const percent = computed(() => {
+  return isNaN(currentTime.value / duration.value)
+    ? 0
+    : currentTime.value / duration.value
+})
 
 const audioRef = ref()
 const toastRef = ref()
-
 const currentLyric = ref()
 const currentLineNum = ref(0)
 const songReady = ref(true)
@@ -76,7 +76,7 @@ const getLyric = (id: string) => {
     lyric = lrc && lrc.lyric
 
     if (!lyric) {
-      currentLyric.value.current = null
+      currentLyric.value = null
       return
     }
     currentLyric.value = new Lyric(lyric, handleLyric, speed.value)
@@ -122,8 +122,8 @@ const updateTime = (e: any) => {
 const handleLoop = () => {
   audioRef.value.currentTime = 0
   changePlayingState(true)
-
   audioRef.value.play()
+
   if (currentLyric.value) {
     currentLyric.value.seek(0)
   }
@@ -134,6 +134,7 @@ const handlePrev = () => {
     handleLoop()
     return
   }
+
   let index = currentIndex.value - 1
   if (index === 0) index = playList.value.length - 1
 
@@ -170,10 +171,12 @@ const changeMode = () => {
 
     const index = findIndex(currentSong.value, sequencePlayList.value)
     changeCurrentIndex(index)
+
     modeText.value = '顺序循环'
   } else if (newMode === 1) {
     //单曲循环
     changePlayList(sequencePlayList)
+
     modeText.value = '单曲循环'
   } else if (newMode === 2) {
     //随机播放
@@ -223,9 +226,9 @@ watchEffect(() => {
   preSong.value = current
   currentPlayingLyric.value = ''
 
-  audioRef.value.current!.src = getSongUrl(current.id)
-  audioRef.value.current!.autoplay = true
-  audioRef.value.current!.playbackRate = speed
+  audioRef.value.src = getSongUrl(current.id)
+  audioRef.value.autoplay = true
+  audioRef.value.playbackRate = speed
 
   changePlayingState(true)
   getLyric(current.id)
@@ -234,34 +237,20 @@ watchEffect(() => {
   duration.value = (current.dt / 1000) | 0
 })
 
-watch(
-  playing,
-  playing => {
-    playing ? audioRef.value.play() : audioRef.value.pause()
-  },
-  {
-    immediate: true,
-    deep: true,
-  }
-)
+watch(playing, playing => {
+  playing ? audioRef.value.play() : audioRef.value.pause()
+})
 
-watch(
-  fullScreen,
-  fullScreen => {
-    if (!fullScreen) return
+watch(fullScreen, fullScreen => {
+  if (!fullScreen) return
 
-    if (currentLyric.value && currentLyric.value.lines.length) {
-      handleLyric({
-        lineNum: currentLineNum.value,
-        txt: currentLyric.value.current.lines[currentLineNum.value].txt,
-      })
-    }
-  },
-  {
-    immediate: true,
-    deep: true,
+  if (currentLyric.value && currentLyric.value.lines.length) {
+    handleLyric({
+      lineNum: currentLineNum.value,
+      txt: currentLyric.value.current.lines[currentLineNum.value].txt,
+    })
   }
-)
+})
 </script>
 
 <template>
@@ -289,7 +278,6 @@ watch(
       @togglePlayListDispatch="changePlayList"
       @clickSpeed="clickSpeed"
     ></NormalPlayer>
-
     <MiniPlayer
       v-if="!isEmptyObject(currentSong)"
       :playing="playing"
@@ -300,8 +288,6 @@ watch(
       @setFullScreen="changeFullScreen"
       @togglePlayList="changeShowPlayList"
     ></MiniPlayer>
-    )
-
     <PlayList @clearPreSong="clearPreSong"></PlayList>
     <audio
       ref="audioRef"

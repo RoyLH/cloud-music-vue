@@ -7,11 +7,11 @@ import Loading from '@/baseUI/loading/index.vue'
 import MusicNote from '@/baseUI/music-note/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
 import AlbumDetail from '@/components/album-detail/index.vue'
-import { useRouter, useRoute } from 'vue-router'
 import { useAlbumStore } from '@/stores/album'
 import { usePlayerStore } from '@/stores/player'
-import { ref, onMounted, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
+import { nextTick, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const showStatus = ref<boolean>(true)
 const title = ref<string>('歌单')
@@ -29,10 +29,10 @@ const {
 const { currentAlbum, enterLoading, pullUpLoading } = storeToRefs(
   useAlbumStore()
 )
-const { playList } = storeToRefs(usePlayerStore())
-
 const { changeEnterLoading, getAlbumList, changePullUpLoading } =
   useAlbumStore()
+
+const { playList } = storeToRefs(usePlayerStore())
 
 const handleScroll = (pos: any) => {
   const minScrollY = -HEADER_HEIGHT
@@ -58,10 +58,6 @@ const handlePullUp = () => {
   changePullUpLoading(false)
 }
 
-const handleBack = () => {
-  showStatus.value = false
-}
-
 const musicAnimation = (x: any, y: any) => {
   musicNoteRef.value.startAnimation({ x, y })
 }
@@ -76,7 +72,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Transition appear name="fly" :duration="300" @afterLeave="router.back()">
+  <Transition appear name="fly" :duration="300" @leave="router.back()">
     <div
       v-if="showStatus"
       class="container"
@@ -86,15 +82,15 @@ onMounted(async () => {
         ref="headerRef"
         :title="title"
         :isMarquee="isMarquee"
-        @handleClick="handleBack"
+        @handleClick="showStatus = false"
       ></Header>
       <Scroll
         v-if="!isEmptyObject(currentAlbum)"
         ref="scrollRef"
         :scroll="true"
         :pullUp="true"
-        :pullUpLoading="pullUpLoading"
         :bounceTop="false"
+        :pullUpLoading="pullUpLoading"
         @handleScroll="handleScroll"
         @handlePullUp="handlePullUp"
       >
@@ -120,27 +116,25 @@ onMounted(async () => {
   right: 0;
   /* bottom: ${(props: { play?: any }) => (props.play > 0 ? '60px' : 0)}; */
   width: 100%;
-  z-index: 100;
+  z-index: 10;
   overflow: hidden;
   background: #f2f3f4;
   transform-origin: right bottom;
 
-  &.fly-enter,
-  &.fly-appear {
+  &.fly-enter-active {
     transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }
 
-  &.fly-enter-active,
-  &.fly-appear-active {
+  &.fly-enter-to {
     transition: transform 0.3s;
     transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
 
-  &.fly-exit {
+  &.fly-leave-from {
     transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
 
-  &.fly-exit-active {
+  &.fly-leave-active {
     transition: transform 0.3s;
     transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }

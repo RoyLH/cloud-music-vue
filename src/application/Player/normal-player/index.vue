@@ -4,7 +4,12 @@ import { formatPlayTime, getName, prefixStyle } from '@/api/utils'
 import ProgressBar from '@/baseUI/progress-bar/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
 import animations from 'create-keyframe-animation'
-import { ref, toRefs, defineProps, defineEmits, watch } from 'vue'
+import { defineEmits, defineProps, ref, toRefs, watch } from 'vue'
+import disc from './disc.png'
+import needle from './needle.png'
+
+// const discImgUrl = new URL('./disc.png', import.meta.url).href
+// const needleImgUrl = new URL('./needle.png', import.meta.url).href
 
 const props = defineProps<{
   full: boolean
@@ -45,24 +50,25 @@ const emit = defineEmits([
   'clickSpeed',
 ])
 
-//处理transform的浏览器兼容问题
+// 处理transform的浏览器兼容问题
 const transform = prefixStyle('transform')
 
 const normalPlayerRef = ref()
 const lyricScrollRef = ref()
-
 const lyricLineRefs = ref([])
-// const cdWrapperRef = ref()
+const cdWrapperRef = ref()
+
 const currentState = ref()
 
 watch(
   currentLineNum,
-  () => {
-    if (!lyricScrollRef.value.current) return
+  currentLineNum => {
+    if (!lyricScrollRef.value) return
+
     const bScroll = lyricScrollRef.value.getBScroll()
 
-    if (currentLineNum.value > 5) {
-      const lineEl = lyricLineRefs.value[currentLineNum.value - 5]
+    if (currentLineNum > 5) {
+      const lineEl = lyricLineRefs.value[currentLineNum - 5]
       bScroll.scrollToElement(lineEl, 1000)
     } else {
       bScroll.scrollTo(0, 0, 1000)
@@ -120,6 +126,7 @@ const beforeEnter = async (el: any) => {
       transform: `translate3d(0, 0, 0) scale(1)`,
     },
   }
+
   animations.registerAnimation({
     name: 'move',
     animation,
@@ -186,10 +193,10 @@ const percentChange = (value: number) => {
     @beforeLeave="beforeLeave"
     @afterLeave="afterLeave"
   >
-    <div class="normal-player-container" ref="normalPlayerRef" v-if="full">
+    <div v-if="full" ref="normalPlayerRef" class="normal-player-container">
       <div class="background">
         <img
-          :src="song.al.picUrl + '?param=300x300'"
+          :src="`${song.al.picUrl}?param=300x300`"
           width="100%"
           height="100%"
           alt="歌曲图片"
@@ -214,18 +221,28 @@ const percentChange = (value: number) => {
               visibility: currentState !== 'lyric' ? 'visible' : 'hidden',
             }"
           >
-            <div :class="`needle ${playing ? '' : 'pause'}`"></div>
-            <div class="cd">
+            <div
+              :class="`needle ${playing ? '' : 'pause'}`"
+              :style="{
+                backgroundImage: `url(${needle})`,
+              }"
+            ></div>
+            <div
+              class="cd"
+              :style="{
+                backgroundImage: `url(${disc})`,
+              }"
+            >
               <img
                 :class="`image play ${playing ? '' : 'pause'}`"
-                :src="song.al.picUrl + '?param=400x400'"
+                :src="`${song.al.picUrl}?param=400x400`"
                 alt=""
               />
             </div>
             <p class="playing-lyric">{{ currentPlayingLyric }}</p>
           </div>
         </Transition>
-        <Transition :duration="400" name="fade">
+        <Transition name="fade" :duration="400">
           <div class="lyric-container" v-if="currentState === 'lyric'">
             <Scroll ref="lyricScrollRef">
               <div
@@ -267,7 +284,7 @@ const percentChange = (value: number) => {
           </div>
           ) })}
         </List>
-        <ProgressWrapper>
+        <div class="progress-wrapper">
           <span class="time time-l">{{ formatPlayTime(currentTime) }}</span>
           <div class="progress-bar-wrapper">
             <ProgressBar
@@ -276,7 +293,7 @@ const percentChange = (value: number) => {
             ></ProgressBar>
           </div>
           <div class="time time-r">{{ formatPlayTime(duration) }}</div>
-        </ProgressWrapper>
+        </div>
         <div class="operators">
           <div class="icon i-left" @click="emit('changeMode')">
             <i class="iconfont" v-html="getPlayMode()"></i>
@@ -287,11 +304,7 @@ const percentChange = (value: number) => {
           <div class="icon i-center">
             <i
               class="iconfont"
-              @click="
-                {
-                  clickPlayingCB
-                }
-              "
+              @click="clickPlayingCB"
               v-html="playing ? '&#xe723;' : '&#xe731;'"
             ></i>
           </div>
@@ -327,7 +340,7 @@ const percentChange = (value: number) => {
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: 150;
+  z-index: 1001;
   /* background: ${style['background-color']}; */
   background: var(--background-color);
 
@@ -349,8 +362,8 @@ const percentChange = (value: number) => {
     }
   }
 
-  &.normal-enter,
-  &.normal-exit-done {
+  &.normal-enter-from,
+  &.normal-exit-to {
     .top {
       transform: translate3d(0, -100px, 0);
     }
@@ -361,7 +374,7 @@ const percentChange = (value: number) => {
   }
 
   &.normal-enter-active,
-  &.normal-exit-active {
+  &.normal-leave-active {
     .top,
     .bottom {
       transform: translate3d(0, 0, 0);
@@ -372,7 +385,7 @@ const percentChange = (value: number) => {
     transition: all 0.4s;
   }
 
-  &.normal-exit-active {
+  &.normal-leave-active {
     opacity: 0;
   }
 }
@@ -445,7 +458,7 @@ const percentChange = (value: number) => {
   font-size: 0;
   overflow: hidden;
 
-  .fade-enter {
+  .fade-enter-from {
     opacity: 0;
   }
 
@@ -454,7 +467,7 @@ const percentChange = (value: number) => {
     transition: all 0.4s;
   }
 
-  .fade-enter-done {
+  .fade-enter-to {
     transition: none;
   }
 
@@ -462,7 +475,7 @@ const percentChange = (value: number) => {
     opacity: 0;
   }
 
-  .fade-exit-done {
+  .fade-exit-to {
     opacity: 0;
   }
 }

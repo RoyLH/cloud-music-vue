@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { debounce } from '@/api/utils'
-import { ref, onMounted, toRefs, watch, defineProps, defineEmits } from 'vue'
+import { defineEmits, defineProps, onMounted, ref, toRefs, watch } from 'vue'
 
 const props = defineProps<{
   newQuery: string
@@ -19,7 +19,7 @@ const handleQueryDebounce = (query: string) => {
 }
 
 onMounted(() => {
-  queryRef.value.current!.focus()
+  queryRef.value.focus()
 })
 
 watch(

@@ -21,7 +21,7 @@ onMounted(() => {
   //     `<div class="iconfont">&#xe642;</div>`
   //   ) as HTMLDivElement
 
-  //   iconsRef.value.current!.appendChild(node)
+  //   iconsRef.value.appendChild(node)
   // }
 
   const domArray = [].slice.call(iconsRef.value.children)
@@ -46,7 +46,7 @@ onMounted(() => {
 defineExpose({
   startAnimation({ x, y }: { x: string; y: string }) {
     for (let i = 0; i < ICON_NUMBER; i++) {
-      const domArray = [].slice.call(iconsRef.value.current!.children)
+      const domArray = [].slice.call(iconsRef.value.children)
 
       const item = domArray[i] as any
 

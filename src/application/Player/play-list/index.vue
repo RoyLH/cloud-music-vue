@@ -3,9 +3,11 @@ import { playMode } from '@/api/config'
 import { findIndex, getName, prefixStyle, shuffle } from '@/api/utils'
 import Confirm from '@/baseUI/confirm/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
-import { ref, defineEmits } from 'vue'
 import { usePlayerStore } from '@/stores/player'
 import { storeToRefs } from 'pinia'
+import { defineEmits, ref } from 'vue'
+
+const emit = defineEmits(['clearPreSong'])
 
 const isShow = ref(false)
 const canTouch = ref(true)
@@ -28,8 +30,6 @@ const {
   mode,
   sequencePlayList,
 } = storeToRefs(usePlayerStore())
-
-const emit = defineEmits(['clearPreSong'])
 
 const {
   changeShowPlayList,
@@ -74,7 +74,7 @@ const handleScroll = (pos: any) => {
 }
 
 const handleTouchStart = (e: any) => {
-  if (!canTouch.value || initialed) return
+  if (!canTouch.value || initialed.value) return
 
   listWrapperRef.value!.style['transition'] = ''
   distance.value = 0
@@ -87,7 +87,7 @@ const handleTouchMove = (e: any) => {
   if (e.nativeEvent.touches[0].pageY - startY.value < 0) return
 
   distance.value = e.nativeEvent.touches[0].pageY - startY.value
-  listWrapperRef.value.current.style.transform = `translate3d(0, ${distance.value}px, 0)`
+  listWrapperRef.value.style.transform = `translate3d(0, ${distance.value}px, 0)`
 }
 
 const handleTouchEnd = () => {
@@ -123,6 +123,7 @@ const handleConfirmClear = () => {
 
 const getPlayMode = () => {
   let content, text
+
   if (mode.value === playMode.sequence) {
     content = '&#xe625;'
     text = '顺序播放'
@@ -140,37 +141,41 @@ const getPlayMode = () => {
   }
 }
 
-const beforeEnter = () => {
+const beforeEnter = (el: any) => {
   isShow.value = true
-  listWrapperRef.value.style[transform] = `translate3d(0, 100%, 0)`
+  el.querySelector('.list-wrapper').style[transform] = `translate3d(0, 100%, 0)`
 }
 
-const enter = () => {
-  listWrapperRef.value.style['transition'] = 'all 0.3s'
-  listWrapperRef.value.style[transform] = `translate3d(0, 0, 0)`
+const enter = (el: any) => {
+  el.querySelector('.list-wrapper').style['transition'] = 'all 0.3s'
+  el.querySelector('.list-wrapper').style[transform] = `translate3d(0, 0, 0)`
 }
 
-const beforeLeave = () => {
-  listWrapperRef.value.style[
+const beforeLeave = (el: any) => {
+  el.querySelector('.list-wrapper').style[
     transform
   ] = `translate3d(0, ${distance.value}px, 0)`
 }
 
-const leave = () => {
-  listWrapperRef.value.style['transition'] = 'all 0.3s'
-  listWrapperRef.value.style[transform] = `translate3d(0px, 100%, 0px)`
+const leave = (el: any) => {
+  el.querySelector('.list-wrapper').style['transition'] = 'all 0.3s'
+  el.querySelector('.list-wrapper').value.style[
+    transform
+  ] = `translate3d(0px, 100%, 0px)`
 }
 
-const afterLeave = () => {
+const afterLeave = (el: any) => {
   isShow.value = false
-  listWrapperRef.value.style[transform] = `translate3d(0px, 100%, 0px)`
+  el.querySelector('.list-wrapper').style[
+    transform
+  ] = `translate3d(0px, 100%, 0px)`
 }
 </script>
 
 <template>
   <Transition
-    :duration="300"
     name="list-fade"
+    :duration="300"
     @beforeEnter="beforeEnter"
     @enter="enter"
     @beforeLeave="beforeLeave"
@@ -178,15 +183,15 @@ const afterLeave = () => {
     @afterLeave="afterLeave"
   >
     <div
-      class="play-list-wrapper"
       v-if="showPlayList"
       ref="playListRef"
+      class="play-list-wrapper"
       :style="{ display: isShow === true ? 'block' : 'none' }"
       @click="changeShowPlayList(false)"
     >
       <div
-        class="list-wrapper"
         ref="listWrapperRef"
+        class="list-wrapper"
         @click.stop
         @onTouchStart="handleTouchStart"
         @onTouchMove="handleTouchMove"
@@ -244,7 +249,7 @@ const afterLeave = () => {
         </div>
       </div>
       <Confirm
-        :ref="confirmRef"
+        ref="confirmRef"
         :text="'是否删除全部?'"
         :cancelBtnText="'取消'"
         :confirmBtnText="'确定'"
@@ -261,7 +266,7 @@ const afterLeave = () => {
   right: 0;
   top: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 1002;
   /* background-color: ${style['background-color-shadow']}; */
   background-color: var(--background-color-shadow);
 
@@ -274,11 +279,11 @@ const afterLeave = () => {
     transition: all 0.3s;
   }
 
-  &.list-fade-exit {
+  &.list-fade-leave-from {
     opacity: 1;
   }
 
-  &.list-fade-exit-active {
+  &.list-fade-leave-active {
     opacity: 0;
     transition: all 0.3s;
   }

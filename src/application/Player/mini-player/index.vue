@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getName } from '@/api/utils'
 import ProgressCircle from '@/baseUI/progress-circle/index.vue'
-import { ref, toRefs, defineProps, defineEmits } from 'vue'
+import { defineEmits, defineProps, ref, toRefs } from 'vue'
 
 const props = defineProps<{
   full: boolean
@@ -29,8 +29,8 @@ const afterLeave = (el: any) => {
 
 <template>
   <Transition
-    :duration="400"
     name="mini"
+    :duration="400"
     @beforeEnter="beforeEnter"
     @afterLeave="afterLeave"
   >
@@ -41,10 +41,10 @@ const afterLeave = (el: any) => {
       @click="$emit('setFullScreen', true)"
     >
       <div class="icon">
-        <div class="img-wrapper" ref="miniWrapperRef">
+        <div ref="miniWrapperRef" class="img-wrapper">
           <img
-            :class="`play ${playing ? '' : 'pause'}`"
             ref="miniImageRef"
+            :class="`play ${playing ? '' : 'pause'}`"
             :src="song.al.picUrl"
             width="40"
             height="40"
@@ -76,7 +76,7 @@ const afterLeave = (el: any) => {
           </template>
         </ProgressCircle>
       </div>
-      <div class="control" @click.stop="$emit('clickPlaying', false)">
+      <div class="control" @click.stop="$emit('clickPlaying', true)">
         <i class="iconfont">&#xe640;</i>
       </div>
     </div>
@@ -115,7 +115,7 @@ const afterLeave = (el: any) => {
     transition: all 0.4s;
   }
 
-  &.mini-exit-active {
+  &.mini-leave-active {
     transform: translate3d(0, 100%, 0);
     transition: all 0.4s;
   }
