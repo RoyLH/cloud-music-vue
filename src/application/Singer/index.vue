@@ -6,11 +6,11 @@ import Header from '@/baseUI/header/index.vue'
 import Loading from '@/baseUI/loading/index.vue'
 import MusicNote from '@/baseUI/music-note/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
-import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useSingerStore } from '@/stores/singer'
 import { usePlayerStore } from '@/stores/player'
+import { useSingerStore } from '@/stores/singer'
+import { storeToRefs } from 'pinia'
+import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const initialHeight = ref(0)
 const showStatus = ref(true)
@@ -42,6 +42,7 @@ onMounted(async () => {
   await getSingerInfo(id as string)
 
   const h = imageWrapperRef.value.offsetHeight
+  console.log(h)
   initialHeight.value = h
 
   songScrollWrapperRef.value.style.top = `${h - OFFSET}px`
@@ -82,7 +83,7 @@ const handleScroll = (pos: any) => {
     layerRef.value.style.top = `${HEADER_HEIGHT - OFFSET}px`
     layerRef.value.style.zIndex = 1
     // 防止溢出的歌单内容遮住Header
-    headerRef.value.style.zIndex = 100
+    headerRef.value.$el.style.zIndex = 100
     // 此时图片高度与Header一致
     imageWrapperRef.value.style.height = `${HEADER_HEIGHT}px`
     imageWrapperRef.value.style.paddingTop = 0
@@ -97,7 +98,7 @@ const musicAnimation = (x: number, y: number) => {
 
 <template>
   <Transition :duration="300" name="fly" appear @afterLeave="router.back()">
-    <div v-if="showStatus" class="container">
+    <div v-if="showStatus" class="container" :style="{ bottom: 0 }">
       <Header
         ref="headerRef"
         :title="artist.name"
@@ -124,7 +125,7 @@ const musicAnimation = (x: number, y: number) => {
           bottom: playList.length > 0 ? '60px' : '0',
         }"
       >
-        <Scroll ref="songScrollRef" :scroll="true" @handleScoll="handleScroll">
+        <Scroll ref="songScrollRef" :scroll="true" @handleScroll="handleScroll">
           <SongsList
             :songs="songsOfArtist"
             :showCollect="false"
@@ -154,22 +155,20 @@ const musicAnimation = (x: number, y: number) => {
   background: #f2f3f4;
   transform-origin: right bottom;
 
-  &.fly-enter,
-  &.fly-appear {
+  &.fly-enter-from {
     transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }
 
-  &.fly-enter-active,
-  &.fly-appear-active {
+  &.fly-enter-active {
     transition: transform 0.3s;
     transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
 
-  &.fly-exit {
+  &.fly-leave-from {
     transform: rotateZ(0deg) translate3d(0, 0, 0);
   }
 
-  &.fly-exit-active {
+  &.fly-leave-active {
     transition: transform 0.3s;
     transform: rotateZ(30deg) translate3d(100%, 0, 0);
   }
