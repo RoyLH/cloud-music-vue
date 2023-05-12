@@ -5,11 +5,11 @@ import Loading from '@/baseUI/loading/index.vue'
 import MusicalNote from '@/baseUI/music-note/index.vue'
 import Scroll from '@/baseUI/scroll/index.vue'
 import SearchBox from '@/baseUI/search-box/index.vue'
-import { useRouter } from 'vue-router'
-import { useSearchStore } from '@/stores/search'
 import { usePlayerStore } from '@/stores/player'
-import { ref, onMounted } from 'vue'
+import { useSearchStore } from '@/stores/search'
 import { storeToRefs } from 'pinia'
+import { nextTick, onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 const loadingSingerUrl = new URL('./singer.png', import.meta.url).href
 const loadingMusicUrl = new URL('./music.png', import.meta.url).href
@@ -18,6 +18,8 @@ const query = ref('')
 const isShow = ref(false)
 
 const musicNoteRef = ref()
+const scrollRef = ref()
+
 const router = useRouter()
 
 const { hotList, enterLoading, suggest, songsList } = storeToRefs(
@@ -27,11 +29,6 @@ const { playList } = storeToRefs(usePlayerStore())
 
 const { getHotKeyWords, changeEnterLoading, getSuggest } = useSearchStore()
 const { getSongDetail } = usePlayerStore()
-
-onMounted(async () => {
-  isShow.value = true
-  if (!hotList.value.length) await getHotKeyWords()
-})
 
 const handleQuery = async (q: any) => {
   query.value = q
@@ -50,33 +47,30 @@ const selectItem = async (e: any, id: string) => {
   })
 }
 
-const searchBack = () => {
-  isShow.value = false
-}
+onMounted(async () => {
+  isShow.value = true
+  if (!hotList.value.length) await getHotKeyWords()
+
+  await nextTick()
+  scrollRef.value?.refresh()
+})
 </script>
 
 <template>
-  <Transition :duration="300" appear name="fly" @afterLeave="router.back()">
+  <Transition appear name="fly" :duration="300" @afterLeave="router.back()">
     <div
       v-if="isShow"
       class="container"
-      :style="{
-        bottom: playList.length > 0 ? '60px' : '0',
-      }"
+      :style="{ bottom: playList.length > 0 ? '60px' : '0' }"
     >
       <div class="search-box-wrapper">
         <SearchBox
-          :back="searchBack"
           :newQuery="query"
+          @back="isShow = false"
           @handleQuery="handleQuery"
         ></SearchBox>
       </div>
-      <div
-        class="shortcut-wrapper"
-        :style="{
-          display: !query ? '' : 'none',
-        }"
-      >
+      <div class="shortcut-wrapper" :style="{ display: !query ? '' : 'none' }">
         <Scroll>
           <div>
             <div class="hot-key">
@@ -104,15 +98,10 @@ const searchBack = () => {
           </div>
         </Scroll>
       </div>
-      <div
-        class="shortcut-wrapper"
-        :style="{
-          display: query ? '' : 'none',
-        }"
-      >
-        <Scroll onScorll="{forceCheck}">
-          <div>
-            <div class="list" v-if="suggest.artists.length">
+      <div class="shortcut-wrapper" :style="{ display: query ? '' : 'none' }">
+        <Scroll ref="scrollRef">
+          <template v-if="suggest.artists?.length">
+            <div class="list">
               <h1 class="title">相关歌手</h1>
               <div
                 class="list-item"
@@ -122,7 +111,7 @@ const searchBack = () => {
               >
                 <div class="img-wrapper">
                   <img
-                    :lazy-load="{
+                    v-lazy="{
                       src: item.picUrl,
                       loading: loadingSingerUrl,
                     }"
@@ -134,30 +123,32 @@ const searchBack = () => {
                 <span class="name">歌手: {{ item.name }}</span>
               </div>
             </div>
-          </div>
-          <div class="list" v-if="suggest.playlists.length">
-            <h1 class="title">相关歌单</h1>
-            <div
-              class="list-item"
-              v-for="(item, index) in suggest.playlists"
-              :key="item.accountId + '' + index"
-              @click="router.push(`/album/${item.id}`)"
-            >
-              <div class="img-wrapper">
-                <img
-                  :lazy-load="{
-                    src: item.coverImgUrl,
-                    loading: loadingMusicUrl,
-                  }"
-                  width="100%"
-                  height="100%"
-                  alt="music"
-                />
+          </template>
+          <template v-if="suggest.playlists?.length">
+            <div class="list">
+              <h1 class="title">相关歌单</h1>
+              <div
+                class="list-item"
+                v-for="(item, index) in suggest.playlists"
+                :key="item.accountId + '' + index"
+                @click="router.push(`/album/${item.id}`)"
+              >
+                <div class="img-wrapper">
+                  <img
+                    v-lazy="{
+                      src: item.coverImgUrl,
+                      loading: loadingMusicUrl,
+                    }"
+                    width="100%"
+                    height="100%"
+                    alt="music"
+                  />
+                </div>
+                <span class="name">歌单: {{ item.name }}</span>
               </div>
-              <span class="name">歌单: {{ item.name }}</span>
             </div>
-          </div>
-          <div class="song-item" :style="{ paddingLeft: '20px' }">
+          </template>
+          <ul class="song-item" :style="{ paddingLeft: '20px' }">
             <li
               v-for="item in songsList"
               :key="item.id"
@@ -170,7 +161,7 @@ const searchBack = () => {
                 </span>
               </div>
             </li>
-          </div>
+          </ul>
         </Scroll>
       </div>
       <EnterLoading v-if="enterLoading">
@@ -194,25 +185,23 @@ const searchBack = () => {
   background: #f2f3f4;
   transform-origin: right bottom;
 
-  &.fly-enter,
-  &.fly-appear {
+  &.fly-enter-active {
     opacity: 0;
     transform: translate3d(100%, 0, 0);
   }
 
-  &.fly-enter-active,
-  &.fly-appear-active {
+  &.fly-enter-to {
     opacity: 1;
     transition: all 0.3s;
     transform: translate3d(0, 0, 0);
   }
 
-  &.fly-exit {
+  &.fly-leave-from {
     opacity: 1;
     transform: translate3d(0, 0, 0);
   }
 
-  &.fly-exit-active {
+  &.fly-leave-active {
     opacity: 0;
     transition: all 0.3s;
     transform: translate3d(100%, 0, 0);
